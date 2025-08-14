@@ -67,18 +67,18 @@ We recommend going through the examples in the following order:
 
     This example shows the simplest way to give an agent a new capability: by writing a Python function that directly calls an external REST API. It's a great starting point for rapid prototyping.
 
-    *   **Go to the example:** `photo_finder_api/README.md`
+    *   **Go to the example:** [photo_finder_api/README.md](photo_finder_api/README.md)
 
 2.  **Build a Standalone Tool Server (`unsplash_mcp_server`)**
 
     This example refactors the direct API calls into a separate, reusable tool server using FastMCP. This decouples your tools from your agent, making them independently deployable and scalable. You will also learn how to deploy this server to Google Cloud Run.
 
-    *   **Go to the example:** `unsplash_mcp_server/README.md`
+    *   **Go to the example:** [unsplash_mcp_server/README.md](unsplash_mcp_server/README.md)
 
 3.  **Connect an Agent to the Tool Server (`photo_finder_mcp`)**
 
     Finally, this example shows how to modify the original agent to connect to the MCP tool server instead of calling the API directly. This demonstrates the recommended pattern for building production-grade agents with shared, robust tools.
 
-    *   **Go to the example:** `photo_finder_mcp/README.md`
+    *   **Go to the example:** [photo_finder_mcp/README.md](photo_finder_mcp/README.md)
 
 To begin, navigate to the `photo_finder_api` directory and follow the instructions in its `README.md` file.
