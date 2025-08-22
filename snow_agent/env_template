@@ -1,0 +1,18 @@
+GOOGLE_CLOUD_PROJECT=
+GOOGLE_CLOUD_LOCATION=
+GOOGLE_GENAI_USE_VERTEXAI=1
+
+# ADK and environment specific variables
+AGENT_REDIRECT_URI="http://127.0.0.1:64161/dev-ui"
+#AGENT_REDIRECT_URI="https://vertexaisearch.cloud.google.com/oauth-redirect"
+
+SNOW_INSTANCE_NAME=devxxxxxxx
+SNOW_OAUTH_SCOPES=useraccount
+
+SNOW_CONNECTION_PROJECT_ID=
+SNOW_CONNECTION_REGION=us-central1
+SNOW_CONNECTION_NAME=
+
+#add clientid and client secret to secret manager and provide secret manager keys here
+SECRET_MANAGER_SNOW_CLIENT_ID=
+SECRET_MANAGER_SNOW_CLIENT_SECRET=
