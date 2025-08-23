@@ -1,0 +1,13 @@
+# Choose Model Backend: 0 -> ML Dev, 1 -> Vertex
+GOOGLE_GENAI_USE_VERTEXAI=1
+
+# Vertex backend config
+GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+GOOGLE_CLOUD_LOCATION=YOUR_LOCATION
+#GOOGLE_CLOUD_LOCATION=us-central1
+
+AUTH_ID=YOUR_AUTH_ID
+#AUTH_ID=snow_dynamic_oauth
+INTEGRATION_CONNECTION=YOUR_INTEGRATION_CONNECTOR
+#INTEGRATION_CONNECTION=snow_connector #this is the name of the integration connection set up in Google Integration Connectors
+
