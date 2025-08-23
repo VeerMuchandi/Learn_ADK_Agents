@@ -1,0 +1,4 @@
+google-adk
+google-cloud-aiplatform[agent_engines]
+deprecated
+google-auth-oauthlib
