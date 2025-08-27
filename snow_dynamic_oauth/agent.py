@@ -14,7 +14,7 @@ from fastapi.openapi.models import OAuthFlows
 
 #load environment variables from .env file
 load_dotenv(override=True)
-PROJECT_ID=os.environ.get("GOOGLE_CLOUD_PROJECT")
+PROJECT_ID=os.environ.get("GOOGLE_CLOUD_PROJECT_ID")
 LOCATION=os.environ.get("GOOGLE_CLOUD_LOCATION")
 AUTH_ID=os.environ.get("AUTH_ID") 
 INTEGRATION_CONNECTION=os.environ.get("INTEGRATION_CONNECTION")
@@ -41,6 +41,8 @@ You are a specialized assistant for interacting with ServiceNow. Your main tasks
     *   **Autonomous Information Gathering:** Do not ask the user for information if you can derive it or retrieve it using a tool. For example, if a user asks for "my open problems," use a LIST tool with appropriate filters.
     *   **Clarification:** If a user's request is ambiguous or lacks essential details for a tool call, ask clarifying questions *before* attempting to use a tool incorrectly.
     *   **Last Resort:** Only ask the user for information as an absolute last resort if tools cannot provide it and clarification doesn't suffice.
+    *   **connectionName parameter ** While calling ApplicationIntegrationToolset, the connectionName parameter must use the google project_id and not project_number i.e. the connectionName should be set to something like  "projects/agentspace-demo-1145-b/locations/us-central1/connections/adk-snow-veer"
+instead of "projects/121968733869/locations/us-central1/connections/adk-snow-veer"
 
 3.  **Presenting Information:**
     *   **Direct and Concise:** After each successful tool call, present the retrieved information to the user directly.
@@ -60,17 +62,25 @@ You are a specialized assistant for interacting with ServiceNow. Your main tasks
 
 
 TOOL_INSTR="""
-        **Tool Definition: Tool for ServiceNow Connector via Application Integration**
+This tool interacts with ServiceNow incidents using an Apigee Integration Connector. It supports GET, LIST, CREATE, and UPDATE operations for the incident entity.
 
-        This tool interacts with ServiceNow Incidents using an Application Integration Connector.
-        It supports GET, LIST, CREATE and UPDATE operations as defined for the incident entity.
+1. Update Operations
+State Field: To update the state field using a textual value (e.g., "In Progress," "Resolved"), the API call must include the sysparm_input_display_value=true query parameter in the URL.
 
-        
-        **CRITICAL: Authentication - `dynamicAuthConfig` Parameter**
+Mandatory Fields: When changing the state, you must also include the following fields if required by ServiceNow's business rules:
 
-        *   **MANDATORY:** Every function call to this tool **MUST** include the `dynamicAuthConfig` parameter in the function call.
-        *   **SYSTEM HANDLED:** Your role is to ensure you *always* include `dynamicAuthConfig` in your function call requests. Example is as follows: { "oauth2_auth_code_flow.access_token": "fe1yWdWelYG0zgayBHtz7fzx15E_Yyt6tGjVYDEsn6UNp9ly0ytY02aoYtphaG4rY-FPiEO8k5JfHSIhN-JWuA" }
-        *   **VALIDATION:** The system expects `dynamicAuthConfig` to be present and valid. Do not attempt to generate or modify its value.
+For "Resolved" or "Closed" States: Include both resolution_code and resolution_notes.
+
+For "On Hold" States: Include the on_hold_reason.
+
+2. Authentication - dynamicAuthConfig Parameter
+MANDATORY: Every function call to this tool MUST include the dynamicAuthConfig parameter.
+
+SYSTEM HANDLED: Your role is to ensure you always include dynamicAuthConfig in your function call requests.
+
+VALIDATION: The system expects dynamicAuthConfig to be present and valid. Do not attempt to generate or modify its value.
+
+
 """
 
 # Retrieves the access token and prepares the dynamicAuthConfig with the access token value 
@@ -93,7 +103,11 @@ def dynamic_token_injection(tool: BaseTool, args: Dict[str, Any], tool_context: 
     args[DYNAMIC_AUTH_PARAM_NAME] = json.dumps(dynamic_auth_config)
     return None
 
-
+#if PROJECT_ID is not a project_id but project_number, throw error
+if PROJECT_ID.isdigit():
+    raise ValueError("PROJECT_ID should be a project ID (string) not a project number (integer). "
+                     "Please provide a valid project ID in the .env file.")
+                     
 
 snow_toolset = ApplicationIntegrationToolset(
     project=PROJECT_ID,
