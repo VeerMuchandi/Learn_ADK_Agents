@@ -41,7 +41,7 @@ sequenceDiagram
 
 ## Implementation of the OAuth 2.0 Flow in the Agent
 
-The `oauth_helper.py` module contains the `get_user_credentials` function, which is the core of the agent's authentication logic. It follows the standard OAuth 2.0 Authorization Code flow.
+The `oauth_helper.py` module contains the `get_user_credentials` function, which is the core of the agent's authentication logic. It follows the standard OAuth 2.0 Authorization Code flow. For a detailed, line-by-line explanation of how the credential lookup is implemented, please refer to the extensive comments within the `oauth_helper.py` file itself.
 
 Here is a step-by-step breakdown of the process:
 
@@ -50,7 +50,7 @@ Here is a step-by-step breakdown of the process:
     *   If the access token is expired but a **refresh token** is available, it automatically uses the refresh token to request a new access token from Google's token endpoint. This happens silently without requiring user interaction.
 
 2.  **Initiate New Auth Flow**: If no valid or refreshable credentials are found, the agent initiates a new authentication flow.
-    *   It calls `tool_context.request_credential()`, passing an `AuthConfig` object. This object contains the `client_id`, `client_secret`, `redirect_uri`, and the required `scopes` (permissions) that the agent needs.
+    *   It calls `tool_context.request_credential()`, passing an `AuthConfig` object. This object contains the `client_id`, `client_secret`, `redirect_uri`, and the required `scopes` (permissions) that the agent needs (see the [Configure OAuth 2.0 credentials](#configure-oauth-20-credentials) section for details on how to obtain the client ID and secret).
 
 3.  **User Authorization**: The ADK framework intercepts this request and generates a unique authorization URL.
     *   The agent returns this URL to the user with a message asking them to sign in.

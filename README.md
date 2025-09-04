@@ -75,19 +75,25 @@ We recommend going through the examples in the following order:
 
     *   **Go to the example:** [unsplash_mcp_server/README.md](unsplash_mcp_server/README.md)
 
-3.  **Connect an Agent to the Tool Server (`photo_finder_mcp`)**
+3.  **Using OAuth 2.0 flow with ADK Agent (`route_planner_agent`)**
+
+    This example demonstrates how to use OAuth 2.0 with the ADK to access Google APIs. It shows how to set up the OAuth 2.0 flow and use the credentials to make authenticated requests to the Google Routes API.
+
+    *   **Go to the example:** [route_planner_agent/README.md](route_planner_agent/README.md)
+
+4.  **Connect an Agent to the Tool Server (`photo_finder_mcp`)**
 
     Finally, this example shows how to modify the original agent to connect to the MCP tool server instead of calling the API directly. This demonstrates the recommended pattern for building production-grade agents with shared, robust tools.
 
     *   **Go to the example:** [photo_finder_mcp/README.md](photo_finder_mcp/README.md)
 
-4.  **Using Integration Connectors with Pre-configured Auth (`snow_agent`)**
+5.  **Using Integration Connectors with Pre-configured Auth (`snow_agent`)**
 
     This example demonstrates how to use the `ApplicationIntegrationToolset` to connect to a Google Cloud Integration Connector for ServiceNow. It uses a pre-configured OAuth 2.0 authentication setup where credentials are managed in Secret Manager. Use this example to test the OAuth 2.0 flow from your local workstation.
 
     *   **Go to the example:** [snow_agent/README.md](snow_agent/README.md)
 
-5.  **Dynamic OAuth with Integration Connectors (`snow_dynamic_oauth`)**
+6.  **Dynamic OAuth with Integration Connectors (`snow_dynamic_oauth`)**
 
     Building on the previous example, this agent implements the full OAuth 2.0 Authorization Code Grant Flow dynamically. It guides the user through the one-time authorization process in Agentspace and then uses the obtained tokens to make secure API calls via the Integration Connector.
 

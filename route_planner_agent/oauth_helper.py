@@ -40,6 +40,17 @@ def get_user_credentials(
   This function checks for cached credentials, refreshes them if necessary,
   and initiates a new OAuth flow if no valid credentials are found.
 
+  NOTE TO LEARNERS: This function is written from the perspective of an
+  application seeking valid credentials in the most efficient way possible.
+  It checks for credentials in the following order:
+  1. Valid cached credentials.
+  2. Expired credentials that can be refreshed.
+  3. A pending authorization response from the user having been redirected back.
+  4. Finally, initiating a new authorization request.
+  To understand the beginning of the user-facing flow, start by looking at
+  step #5 (`tool_context.request_credential`), which is where the user is
+  prompted to log in and grant consent.
+
   Args:
       tool_context: The context of the tool run, provided by the ADK.
       client_id: The OAuth client ID.
@@ -98,9 +109,15 @@ def get_user_credentials(
 
   # 4. If we still don't have valid credentials, check for an auth response.
   if not creds or not creds.valid:
+    # The ADK abstracts the OAuth 2.0 flow. `get_auth_response` checks
+    # if the user has been redirected back from the authorization server with
+    # an authorization code. If so, the ADK automatically exchanges the code
+    # for an access token and returns the token response.
     auth_response = tool_context.get_auth_response(auth_config)
     if auth_response:
       logging.info("Received new auth response. Fetching token.")
+      # Create a `Credentials` object using the tokens from the auth response.
+      # This object can then be used to make authenticated API calls.
       creds = Credentials(
           token=auth_response.oauth2.access_token,
           refresh_token=auth_response.oauth2.refresh_token,
@@ -109,9 +126,13 @@ def get_user_credentials(
           client_secret=client_secret,
           scopes=scopes,
       )
+      # Cache the new credentials in the session state for future use.
       tool_context.state[credential_cache_key] = creds.to_json()
     else:
-      # 5. If no credentials and no response, request authentication.
+      # 5. If no valid credentials could be found or refreshed, and there is no
+      #    pending authorization response, this is the final step.
+      #    `request_credential` initiates the OAuth 2.0 authorization code flow,
+      #    prompting the user to log in and grant consent via the provider's UI.
       logging.info("No valid credentials. Requesting user authentication.")
       tool_context.request_credential(auth_config)
       return None
