@@ -1,0 +1,4 @@
+google-adk
+requests
+python-dotenv
+google-auth-oauthlib

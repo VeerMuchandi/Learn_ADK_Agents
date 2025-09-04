@@ -85,12 +85,12 @@ We recommend going through the examples in the following order:
 
     This example demonstrates how to use the `ApplicationIntegrationToolset` to connect to a Google Cloud Integration Connector for ServiceNow. It uses a pre-configured OAuth 2.0 authentication setup where credentials are managed in Secret Manager. Use this example to test the OAuth 2.0 flow from your local workstation.
 
-    *   **Go to the example:** snow_agent/README.md
+    *   **Go to the example:** [snow_agent/README.md](snow_agent/README.md)
 
 5.  **Dynamic OAuth with Integration Connectors (`snow_dynamic_oauth`)**
 
     Building on the previous example, this agent implements the full OAuth 2.0 Authorization Code Grant Flow dynamically. It guides the user through the one-time authorization process in Agentspace and then uses the obtained tokens to make secure API calls via the Integration Connector.
 
-    *   **Go to the example:** snow_dynamic_oauth/README.md
+    *   **Go to the example:** [snow_dynamic_oauth/README.md](snow_dynamic_oauth/README.md)
 
 To begin, navigate to the `photo_finder_api` directory and follow the instructions in its `README.md` file.
