@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 import json
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from google.adk.auth import AuthConfig, AuthCredential, AuthCredentialTypes, OAuth2Auth
 from google.adk.tools import ToolContext
@@ -33,7 +33,7 @@ def get_user_credentials(
     redirect_uri: str,
     scopes: List[str],
     credential_cache_key: str,
-) -> Optional[Credentials]:
+) -> Union[Credentials, AuthConfig, None]:
   """
   Handles the OAuth 2.0 flow to get valid user credentials.
 
@@ -62,7 +62,8 @@ def get_user_credentials(
 
   Returns:
       A valid `google.oauth2.credentials.Credentials` object if authentication
-      is successful, or `None` if the authentication flow has been initiated
+      is successful, or an `AuthConfig` object if the authentication flow
+      has been initiated
       and is pending user action.
   """
   # 1. Define the authentication configuration for the tool.
@@ -104,8 +105,9 @@ def get_user_credentials(
       tool_context.state[credential_cache_key] = creds.to_json()
     except exceptions.RefreshError as e:
       logging.warning("Token refresh failed: %s. Requesting new credentials.", e)
-      creds = None  # Force re-authentication
-      del tool_context.state[credential_cache_key]
+      if credential_cache_key in tool_context.state:
+        del tool_context.state[credential_cache_key]
+      return tool_context.request_credential(auth_config)
 
   # 4. If we still don't have valid credentials, check for an auth response.
   if not creds or not creds.valid:
@@ -134,7 +136,6 @@ def get_user_credentials(
       #    `request_credential` initiates the OAuth 2.0 authorization code flow,
       #    prompting the user to log in and grant consent via the provider's UI.
       logging.info("No valid credentials. Requesting user authentication.")
-      tool_context.request_credential(auth_config)
-      return None
+      return tool_context.request_credential(auth_config)
 
   return creds

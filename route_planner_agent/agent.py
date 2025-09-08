@@ -1,5 +1,5 @@
 from google.adk.agents import LlmAgent
-from .route_planner import get_directions, get_address_of_place  # Import the custom tool module
+from .route_planner import get_directions, get_address_of_place, search_nearby_places  # Import the custom tool module
 
 # This agent uses a custom tool that handles a user-centric OAuth flow.
 # The ADK framework discovers the `get_directions` function from the tool and
@@ -19,8 +19,10 @@ If the user provides a named place (like 'home', 'office', or a business name) i
 
 Once you have the full addresses for both the origin and destination, and the travel mode (e.g., driving, walking, bicycling, or transit), you MUST call the `get_directions` tool to find the route.
 
+If the user asks for places near a location, you MUST use the `search_nearby_places` tool. You will need the location's address and what type of place to search for (e.g., "restaurants", "coffee shops").
+
 If any of this information is missing, ask the user for it before calling a tool.
 
 Present the final directions from the tool directly to the user.""",
-    tools=[get_directions, get_address_of_place],
+    tools=[get_directions, get_address_of_place, search_nearby_places],
 )
