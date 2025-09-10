@@ -23,6 +23,7 @@ TOKEN_FILE = "token.json"
 SCOPES = [
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/user.addresses.read",
+    "https://www.googleapis.com/auth/user.names.read",
     "https://www.googleapis.com/auth/userinfo.profile"
 ]
 
@@ -32,11 +33,8 @@ ROUTES_API_URL = "https://routes.googleapis.com/directions/v2:computeRoutes"
 # The endpoint for the Places API (Text Search)
 PLACES_API_URL = "https://places.googleapis.com/v1/places:searchText"
 
-# The endpoint for the Places API (Nearby Search)
-PLACES_NEARBY_API_URL = "https://places.googleapis.com/v1/places:searchNearby"
-
 # The endpoint for the People API
-PEOPLE_API_URL = "https://people.googleapis.com/v1/people/me?personFields=addresses"
+PEOPLE_API_URL = "https://people.googleapis.com/v1/people/me?personFields=names,addresses"
 
 from .oauth_helper import get_user_credentials
 

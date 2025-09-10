@@ -1,4 +1,5 @@
-google-adk
+google-adk==1.12.0
+fastapi==0.115.14
 requests
 python-dotenv
-google-auth-oauthlib
+google-auth-oauthlib==1.2.2
