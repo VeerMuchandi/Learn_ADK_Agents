@@ -1,10 +1,15 @@
 from google.adk.agents import Agent
-from google.adk.tools import VertexAiSearchTool
 from . import tools
 from dotenv import load_dotenv
+import vertexai
 import os
 
 load_dotenv()
+
+vertexai.init(
+    project= str(os.getenv("GOOGLE_CLOUD_PROJECT")),
+    location= str(os.getenv("GOOGLE_CLOUD_LOCATION"))
+)
 
 #DATASTORE_PATH=os.getenv("DATASTORE_PATH")
 
