@@ -23,7 +23,6 @@ TOKEN_FILE = "token.json"
 SCOPES = [
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/user.addresses.read",
-    "https://www.googleapis.com/auth/user.names.read",
     "https://www.googleapis.com/auth/userinfo.profile"
 ]
 

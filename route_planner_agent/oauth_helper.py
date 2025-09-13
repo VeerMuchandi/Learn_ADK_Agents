@@ -117,16 +117,16 @@ def get_user_credentials(
     # for an access token and returns the token response.
     auth_response = tool_context.get_auth_response(auth_config)
     if auth_response:
-      logging.info("Received new auth response. Fetching token.")
-      # Create a `Credentials` object using the tokens from the auth response.
-      # This object can then be used to make authenticated API calls.
+      logging.info("Received new auth response. Creating credentials.")
+      # The ADK has already exchanged the auth code for tokens.
+      # We create a google.oauth2.credentials.Credentials object from the
+      # response provided by the ADK.
       creds = Credentials(
           token=auth_response.oauth2.access_token,
           refresh_token=auth_response.oauth2.refresh_token,
           token_uri=auth_config.auth_scheme.flows.authorizationCode.tokenUrl,
           client_id=client_id,
           client_secret=client_secret,
-          scopes=scopes,
       )
       # Cache the new credentials in the session state for future use.
       tool_context.state[credential_cache_key] = creds.to_json()
