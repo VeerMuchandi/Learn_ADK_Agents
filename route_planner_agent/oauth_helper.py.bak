@@ -136,7 +136,6 @@ def get_user_credentials(
       #    `request_credential` initiates the OAuth 2.0 authorization code flow,
       #    prompting the user to log in and grant consent via the provider's UI.
       logging.info("No valid credentials. Requesting user authentication.")
-      
       return tool_context.request_credential(auth_config)
 
   return creds

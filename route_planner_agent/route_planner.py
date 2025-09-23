@@ -63,6 +63,7 @@ def get_directions(
   client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
   redirect_uri = os.getenv("AGENT_REDIRECT_URI")
 
+
   if not all([client_id, client_secret, redirect_uri]):
     return "Error: OAuth Client ID, Secret, or Redirect URI is not configured in the .env file."
 
@@ -145,9 +146,11 @@ def get_address_of_place(tool_context: ToolContext, place_name: str) -> str:
       A JSON string containing the formatted address and location (latitude/longitude) of the place, or an error message.
   """
   logging.info("Tool called: Getting address for '%s'.", place_name)
+
   client_id = os.getenv("GOOGLE_CLIENT_ID")
   client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
   redirect_uri = os.getenv("AGENT_REDIRECT_URI")
+
 
   if not all([client_id, client_secret, redirect_uri]):
     return "Error: OAuth Client ID, Secret, or Redirect URI is not configured in the .env file."
@@ -260,9 +263,11 @@ def search_nearby_places(
   logging.info(
       "Tool called: Searching for '%s' near '%s'.", query, location
   )
+
   client_id = os.getenv("GOOGLE_CLIENT_ID")
   client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
   redirect_uri = os.getenv("AGENT_REDIRECT_URI")
+
 
   if not all([client_id, client_secret, redirect_uri]):
     return "Error: OAuth Client ID, Secret, or Redirect URI is not configured in the .env file."

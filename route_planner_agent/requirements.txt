@@ -1,8 +1,5 @@
-google-cloud-aiplatform==1.110.0
-google-genai==1.24.0
-google-adk==1.12.0
-fastapi==0.115.14
+./agents/route_planner_agent/google_genai-1.38.0-py3-none-any.whl
+fastapi
 requests
 python-dotenv
-google-auth-oauthlib==1.2.2
-
+google-auth-oauthlib
