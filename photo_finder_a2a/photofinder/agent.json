@@ -1,0 +1,29 @@
+{
+    "name": "photo_finder_agent",
+    "description": "This agent helps find images and photos from Unsplash ",
+    "defaultInputModes": ["text/plain"],
+    "defaultOutputModes": ["application/json"],
+    "skills": [
+        {
+        "id": "get_photo_by_id",
+        "name": "Find a photo by ID",
+        "description": "Given a photo id, it can find a photo or image from Unspash",
+        "tags": ["photo finder", "image finder", "unsplash"]
+         },
+        {
+        "id": "get_random_photo",
+        "name": "Find a random photo",
+        "description": "Finds a random photo from Unsplash, if the user doesnt give any criteria",
+        "tags": ["random photo finder", "random image finder", "unsplash"]
+        },
+        {
+        "id": "search_photos",
+        "name": "Search for photos",
+        "description": "Searches photos or images from Unsplash based on user input",
+        "tags": ["photo searcher", "image searcher", "unsplash"]
+        }
+    ],
+    "url": "http://localhost:8010/a2a/photofinder",
+    "capabilities": {},
+    "version": "1.0.0"
+}
