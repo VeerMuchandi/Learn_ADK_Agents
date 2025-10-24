@@ -67,7 +67,16 @@ When you open the application in your browser, you will see the following elemen
 
 ## Implementing the OAuth2 Flow in a Front-end Application
 
-The core of this application is its handling of the OAuth2 flow. Here is a step-by-step guide on how it works, with code snippets from this application as examples.
+The core of this application is its handling of the OAuth2 flow. The application demonstrates the following flow to authenticate with the agent and authorize access to protected tools:
+
+1.  **Session Creation:** The user creates a session with the agent.
+2.  **Initial Chat:** The user sends a message to the agent.
+3.  **OAuth Trigger:** If the agent needs to use a tool that requires authentication, it responds with a request for credentials, including an `authUri`.
+4.  **User Authentication:** The frontend opens the `authUri` in a popup window, where the user can sign in and grant consent.
+5.  **OAuth Callback:** After authentication, the user is redirected to the `/oauth_callback` endpoint, which captures the authorization code.
+6.  **Code Exchange:** The frontend sends the authorization code back to the backend, which then sends it to the agent to complete the authentication process.
+
+Here is a step-by-step guide on how it works, with code snippets and examples from this application.
 
 ### Step 1: Initiating the Chat and Triggering the OAuth Flow
 
@@ -118,8 +127,36 @@ When the user sends a message that requires an OAuth-protected tool, the agent r
 
 2.  The `/chat` endpoint in `main.py` forwards the message to the agent.
 
+**Initial Chat Request**
+```
+--- Chat Request (Initial) ---
+URL: https://us-central1-aiplatform.googleapis.com/v1/projects/muchandi-proj1/locations/us-central1/reasoningEngines/3292892189654253568:streamQuery?alt=sse
+Headers: {"Content-Type": "application/json", "Authorization": "Bearer [BEARER_TOKEN]", "Connection": "close"}
+Body: {
+  "class_method": "async_stream_query",
+  "input": {
+    "user_id": "user-from-custom-ae-tester",
+    "session_id": "1200381099386077184",
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "text": "route from atlanta ga to apex nc by car"
+        }
+      ]
+    }
+  }
+}
+--------------------------
+```
 3.  The agent determines that the requested tool requires authentication and responds with an `authorization_url`.
+**Agent Response with Auth URI**
 
+The agent responds with a request for credentials, including the `authorizationUrl`.
+
+```
+SSE Data: {"content": {"parts": [{"function_call": {"id": "adk-0478ad02-ed00-4416-b932-d6ed032c62ae", "args": {"functionCallId": "adk-a1431b9b-1951-4639-8db8-1c20145f989c", "authConfig": {"authScheme": {"type": "oauth2", "flows": {"authorizationCode": {"scopes": {"https://www.googleapis.com/auth/cloud-platform": "", "https://www.googleapis.com/auth/user.addresses.read": "", "https://www.googleapis.com/auth/userinfo.profile": ""}}, "authorizationUrl": "https://accounts.google.com/o/oauth2/auth", "tokenUrl": "https://oauth2.googleapis.com/token"}}}, "rawAuthCredential": {"authType": "oauth2", "oauth2": {"clientId": "[CLIENT_ID]", "clientSecret": "[CLIENT_SECRET]", "redirectUri": "http://127.0.0.1:8080/oauth_callback"}}, "exchangedAuthCredential": {"authType": "oauth2", "oauth2": {"clientId": "[CLIENT_ID]", "clientSecret": "[CLIENT_SECRET]", "authUri": "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=[CLIENT_ID]&redirect_uri=http%3A%2F%2F127.0.0.1%3A8080%2Foauth_callback&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuser.addresses.read+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&state=MIIfNCOI9CfkaFVSJIhLsiPDUSXiDg&access_type=offline&prompt=consent", "state": "MIIfNCOI9CfkaFVSJIhLsiPDUSXiDg", "redirectUri": "http://127.0.0.1:8080/oauth_callback"}}, "credentialKey": "adk_oauth2_3119459921658935125_oauth2_-568389594588614771"}}, "name": "adk_request_credential"}], "role": "user"}, "invocation_id": "e-43128e19-237f-4c0e-8fef-b50d0f09e717", "author": "route_planning_agent", "actions": {"state_delta": {}, "artifact_delta": {}, "requested_auth_configs": {}, "requested_tool_confirmations": {}}, "long_running_tool_ids": ["adk-0478ad02-ed00-4416-b932-d6ed032c62ae"], "id": "773f0f85-821b-42e2-8af6-0e361b34fe00", "tim... [truncated]
+```
 4.  The `/chat` endpoint parses the agent's response, finds the `authorization_url`, and sends it back to the front-end.
 
     *main.py:*
@@ -231,62 +268,6 @@ The main window receives the `postMessage` event and now has the `code` and `sta
         }
         data = {"class_method": "async_stream_query", "input": payload}
     ```
-
-4.  The agent receives the `function_response`, exchanges the `auth_code` for an access token, and can now execute the OAuth-protected tool.
-
-## Agent Engine Interaction
-
-The application consists of a simple HTML frontend and a Flask backend that communicates with the Reasoning Engine. The backend handles session management, authentication, and the OAuth2 flow.
-
-### Authentication and OAuth2 Flow
-
-The application demonstrates the following flow to authenticate with the agent and authorize access to protected tools:
-
-1.  **Session Creation:** The user creates a session with the agent.
-2.  **Initial Chat:** The user sends a message to the agent.
-3.  **OAuth Trigger:** If the agent needs to use a tool that requires authentication, it responds with a request for credentials, including an `authUri`.
-4.  **User Authentication:** The frontend opens the `authUri` in a popup window, where the user can sign in and grant consent.
-5.  **OAuth Callback:** After authentication, the user is redirected to the `/oauth_callback` endpoint, which captures the authorization code.
-6.  **Code Exchange:** The frontend sends the authorization code back to the backend, which then sends it to the agent to complete the authentication process.
-
-### Example Agent Backend Calls
-
-Here is an example of the requests and responses exchanged between the Agent Engine UI Tester and the Reasoning Engine during the OAuth2 flow.
-
-**Initial Chat Request**
-
-The user sends a message to the agent.
-
-```
---- Chat Request (Initial) ---
-URL: https://us-central1-aiplatform.googleapis.com/v1/projects/muchandi-proj1/locations/us-central1/reasoningEngines/3292892189654253568:streamQuery?alt=sse
-Headers: {"Content-Type": "application/json", "Authorization": "Bearer [BEARER_TOKEN]", "Connection": "close"}
-Body: {
-  "class_method": "async_stream_query",
-  "input": {
-    "user_id": "user-from-custom-ae-tester",
-    "session_id": "1200381099386077184",
-    "message": {
-      "role": "user",
-      "parts": [
-        {
-          "text": "route from atlanta ga to apex nc by car"
-        }
-      ]
-    }
-  }
-}
---------------------------
-```
-
-**Agent Response with Auth URI**
-
-The agent responds with a request for credentials, including the `authUri`.
-
-```
-SSE Data: {"content": {"parts": [{"function_call": {"id": "adk-0478ad02-ed00-4416-b932-d6ed032c62ae", "args": {"functionCallId": "adk-a1431b9b-1951-4639-8db8-1c20145f989c", "authConfig": {"authScheme": {"type": "oauth2", "flows": {"authorizationCode": {"scopes": {"https://www.googleapis.com/auth/cloud-platform": "", "https://www.googleapis.com/auth/user.addresses.read": "", "https://www.googleapis.com/auth/userinfo.profile": ""}}, "authorizationUrl": "https://accounts.google.com/o/oauth2/auth", "tokenUrl": "https://oauth2.googleapis.com/token"}}}, "rawAuthCredential": {"authType": "oauth2", "oauth2": {"clientId": "[CLIENT_ID]", "clientSecret": "[CLIENT_SECRET]", "redirectUri": "http://127.0.0.1:8080/oauth_callback"}}, "exchangedAuthCredential": {"authType": "oauth2", "oauth2": {"clientId": "[CLIENT_ID]", "clientSecret": "[CLIENT_SECRET]", "authUri": "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=[CLIENT_ID]&redirect_uri=http%3A%2F%2F127.0.0.1%3A8080%2Foauth_callback&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuser.addresses.read+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&state=MIIfNCOI9CfkaFVSJIhLsiPDUSXiDg&access_type=offline&prompt=consent", "state": "MIIfNCOI9CfkaFVSJIhLsiPDUSXiDg", "redirectUri": "http://127.0.0.1:8080/oauth_callback"}}, "credentialKey": "adk_oauth2_3119459921658935125_oauth2_-568389594588614771"}}, "name": "adk_request_credential"}], "role": "user"}, "invocation_id": "e-43128e19-237f-4c0e-8fef-b50d0f09e717", "author": "route_planning_agent", "actions": {"state_delta": {}, "artifact_delta": {}, "requested_auth_configs": {}, "requested_tool_confirmations": {}}, "long_running_tool_ids": ["adk-0478ad02-ed00-4416-b932-d6ed032c62ae"], "id": "773f0f85-821b-42e2-8af6-0e361b34fe00", "tim... [truncated]
-```
-
 **Chat Request with Auth Code**
 
 After the user authenticates, the authorization code is sent back to the agent.
@@ -351,6 +332,7 @@ Body: {
 }
 --------------------------
 ```
+4.  The agent receives the `function_response`, exchanges the `auth_code` for an access token, and can now execute the OAuth-protected tool.
 
 **Final Agent Response**
 
