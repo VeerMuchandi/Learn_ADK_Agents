@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+<head>
+    <title>Chat with Agent</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; background-color: #f5f5f5; }
+        .control-group { margin-bottom: 20px; text-align: center; }
+        #agent-url-input { width: 80%; max-width: 700px; }
+        #chat-container { width: 80%; max-width: 800px; border: 1px solid #ccc; border-radius: 5px; padding: 20px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #messages { height: 400px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; }
+        .message { margin-bottom: 10px; }
+        .user-message { text-align: right; }
+        .agent-message { text-align: left; }
+        .system-message { text-align: center; color: #888; font-style: italic; }
+        #message-form { display: flex; }
+        #message-input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 3px; }
+        #send-button { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 3px; cursor: pointer; }
+        input, button { font-size: 1em; padding: 5px; margin: 0 5px; }
+    </style>
+</head>
+<body>
+    <h1>Chat with your Agent</h1>
+
+    <div class="control-group">
+        <strong>Agent URL:</strong>
+        <input type="text" id="agent-url-input" list="agent-list">
+        <datalist id="agent-list"></datalist>
+    </div>
+
+    <div class="control-group">
+        <strong>Session:</strong> <span id="session-id">None</span>
+        <button id="new-session-btn">New Session</button>
+        <button id="delete-session-btn">Delete Session</button>
+    </div>
+
+    <div id="chat-container">
+        <div id="messages"></div>
+        <form id="message-form">
+            <input id="message-input" type="text" placeholder="Create a session to start chatting..." disabled>
+            <button id="send-button" type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const sessionIdSpan = document.getElementById('session-id');
+        const newSessionBtn = document.getElementById('new-session-btn');
+        const deleteSessionBtn = document.getElementById('delete-session-btn');
+        const agentUrlInput = document.getElementById('agent-url-input');
+        const agentList = document.getElementById('agent-list');
+
+        let currentSessionId = null;
+
+        async function loadAgents() {
+            try {
+                const response = await fetch('/list-agents');
+                const agents = await response.json();
+                if (agents.error) throw new Error(agents.error);
+                
+                agentList.innerHTML = '';
+                agents.forEach(agent => {
+                    const option = document.createElement('option');
+                    option.value = agent.name;
+                    option.textContent = agent.displayName;
+                    agentList.appendChild(option);
+                });
+            } catch (error) {
+                appendMessage('Error', `Failed to load agent list: ${error.message}`, 'system-message');
+            }
+        }
+
+        async function loadDefaultUrl() {
+            try {
+                const response = await fetch('/agent-url');
+                const data = await response.json();
+                if (data.agent_url) {
+                    agentUrlInput.value = data.agent_url;
+                }
+            } catch (error) {
+                appendMessage('Error', `Failed to load default agent URL: ${error.message}`, 'system-message');
+            }
+        }
+
+        newSessionBtn.addEventListener('click', async () => {
+            const agent_url = agentUrlInput.value;
+            if (!agent_url) {
+                alert('Please enter or select an agent URL.');
+                return;
+            }
+            try {
+                const response = await fetch('/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_url })
+                });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                currentSessionId = data.session_id;
+                sessionIdSpan.textContent = currentSessionId;
+                messageInput.disabled = false;
+                messageInput.placeholder = 'Type your message...';
+                messagesDiv.innerHTML = '';
+                appendMessage('System', `Session ${currentSessionId} created.`, 'system-message');
+            } catch (error) {
+                appendMessage('Error', `Failed to create session: ${error.message}`, 'system-message');
+            }
+        });
+
+        deleteSessionBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/session', { method: 'DELETE' });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                const oldSessionId = currentSessionId;
+                currentSessionId = null;
+                sessionIdSpan.textContent = 'None';
+                messageInput.disabled = true;
+                messageInput.placeholder = 'Create a session to start chatting...';
+                appendMessage('System', `Session ${oldSessionId} deleted.`, 'system-message');
+            } catch (error) {
+                appendMessage('Error', `Failed to delete session: ${error.message}`, 'system-message');
+            }
+        });
+
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = messageInput.value;
+            const agent_url = agentUrlInput.value;
+            if (!message || !currentSessionId || !agent_url) return;
+
+            appendMessage('You', message, 'user-message');
+            messageInput.value = '';
+            appendMessage('Agent', 'Thinking...', 'agent-message');
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, agent_url })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                messagesDiv.removeChild(messagesDiv.lastChild);
+
+                if (data.authorization_url) {
+                    appendMessage('Agent', 'Authentication required. Please complete the process in the popup window.', 'agent-message');
+                    window.open(data.authorization_url, 'oauth_popup', 'width=600,height=700');
+                } else if (data.response) {
+                    appendMessage('Agent', data.response, 'agent-message');
+                } else if (data.error) {
+                    appendMessage('Error', data.error, 'agent-message');
+                }
+            } catch (error) {
+                messagesDiv.removeChild(messagesDiv.lastChild);
+                appendMessage('Error', error.message, 'agent-message');
+            }
+        });
+
+        window.addEventListener('message', async (event) => {
+            if (event.origin !== window.location.origin) return;
+            if (!event.data || event.data.type !== 'oauth_complete') return;
+
+            const { auth_code, state } = event.data;
+            if (auth_code) {
+                appendMessage('System', 'Authentication complete. Fetching final response...', 'system-message');
+                const agent_url = agentUrlInput.value;
+
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ auth_code, state, agent_url })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (data.error) {
+                        appendMessage('Error', data.error, 'agent-message');
+                    } else {
+                        appendMessage('Agent', data.response, 'agent-message');
+                    }
+                } catch (error) {
+                    appendMessage('Error', `Auth fetch error: ${error.message}`, 'agent-message');
+                }
+            }
+        }, false);
+
+        function appendMessage(sender, message, className) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', className);
+            const strong = document.createElement('strong');
+            strong.textContent = `${sender}: `;
+            messageElement.appendChild(strong);
+            
+            const content = document.createElement('span');
+            content.innerHTML = message.replace(/\n/g, '<br>');
+            messageElement.appendChild(content);
+
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAgents();
+            loadDefaultUrl();
+        });
+    </script>
+</body>
+</html>

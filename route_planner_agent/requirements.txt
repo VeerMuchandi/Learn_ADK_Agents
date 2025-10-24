@@ -1,5 +1,6 @@
-./agents/route_planner_agent/google_genai-1.38.0-py3-none-any.whl
 fastapi
 requests
 python-dotenv
 google-auth-oauthlib
+google-cloud-aiplatform
+google-adk

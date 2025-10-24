@@ -7,12 +7,21 @@ from typing import Union
 
 import requests
 from google.adk.auth import AuthConfig
+from google.cloud import logging as cloud_logging
 from dotenv import load_dotenv
 from google.adk.tools import ToolContext
 
 # --- Configuration ---
 # Load environment variables from a .env file
 load_dotenv()
+ 
+# --- Logging Setup ---
+# In a Google Cloud environment, the google-cloud-logging library is used.
+# We explicitly set it up to ensure INFO-level logs are captured.
+# This is more robust than logging.basicConfig() because it directly
+# configures the handler that sends logs to Google Cloud Logging.
+logging_client = cloud_logging.Client()
+logging_client.setup_logging(log_level=logging.INFO)
 
 # The file to store user's access and refresh tokens.
 # Created automatically when the authorization flow completes for the first time.

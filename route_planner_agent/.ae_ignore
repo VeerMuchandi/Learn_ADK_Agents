@@ -1,3 +1,6 @@
 __pycache__
 .gitignore
 test_people_api.py
+deploy.py
+google_genai-1.38.0-py3-none-any.whl
+oauth_helper.py.bak

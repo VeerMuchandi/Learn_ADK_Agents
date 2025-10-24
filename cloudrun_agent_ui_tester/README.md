@@ -1,14 +1,14 @@
-# Custom UI for Testing ADK Agents
+# cloudrun_agent_ui_tester for Testing ADK Agents
 
-This document provides a guide on how to use and understand the Custom UI application, with a special focus on its implementation of the OAuth2 flow for authenticating with ADK agents.
+This document provides a guide on how to use and understand the cloudrun_agent_ui_tester application, with a special focus on its implementation of the OAuth2 flow for authenticating with ADK agents.
 
 ## Overview
 
-The Custom UI is a Flask-based web application that provides a simple chat interface for interacting with ADK agents deployed remotely. It demonstrates how a front-end application can handle the user-centric OAuth2 flow required by agents that use tools protected by OAuth.
+The cloudrun_agent_ui_tester is a Flask-based web application that provides a simple chat interface for interacting with ADK agents deployed remotely. It demonstrates how a front-end application can handle the user-centric OAuth2 flow required by agents that use tools protected by OAuth.
 
 ## Application Architecture
 
-The `custom-ui` application is composed of three main components:
+The `cloudrun_agent_ui_tester` application is composed of three main components:
 
 1.  **Front-end (Client/Browser):** This is what you see and interact with in your web browser. It is built with HTML, CSS, and Javascript.
 2.  **Back-end (Flask Application):** This is the Python server (`main.py`) that runs on your local machine. It acts as a bridge between the front-end and the remote agent.
@@ -47,7 +47,7 @@ graph LR
         *   Manages the chat session.
 
 *   **Remote Agent:**
-    *   **What it is:** The deployed ADK agent (e.g., the `route_planner_agent`).
+    *   **What it is:** The deployed ADK agent.
     *   **What it does:**
         *   Receives and understands your messages.
         *   Uses its tools to perform tasks (e.g., get directions).
@@ -245,22 +245,22 @@ sequenceDiagram
     participant User
     participant Browser (Main Window)
     participant Browser (Popup)
-    participant Custom UI Backend (Flask)
+    participant cloudrun_agent_ui_tester Backend (Flask)
     participant Remote Agent
 
     User->>Browser (Main Window): Enters message and clicks "Send"
-    Browser (Main Window)->>Custom UI Backend (Flask): POST /chat with message
-    Custom UI Backend (Flask)->>Remote Agent: POST /run_sse with message
-    Remote Agent-->>Custom UI Backend (Flask): SSE: authorization_url
-    Custom UI Backend (Flask)-->>Browser (Main Window): JSON: { authorization_url: ... }
+    Browser (Main Window)->>cloudrun_agent_ui_tester Backend (Flask): POST /chat with message
+    cloudrun_agent_ui_tester Backend (Flask)->>Remote Agent: POST /run_sse with message
+    Remote Agent-->>cloudrun_agent_ui_tester Backend (Flask): SSE: authorization_url
+    cloudrun_agent_ui_tester Backend (Flask)-->>Browser (Main Window): JSON: { authorization_url: ... }
     Browser (Main Window)->>Browser (Popup): window.open(authorization_url)
     User->>Browser (Popup): Logs in and grants consent
-    Browser (Popup)->>Custom UI Backend (Flask): GET /oauth_callback with code and state
-    Custom UI Backend (Flask)-->>Browser (Popup): HTML with postMessage javascript
+    Browser (Popup)->>cloudrun_agent_ui_tester Backend (Flask): GET /oauth_callback with code and state
+    cloudrun_agent_ui_tester Backend (Flask)-->>Browser (Popup): HTML with postMessage javascript
     Browser (Popup)->>Browser (Main Window): postMessage({ auth_code: ..., state: ... })
-    Browser (Main Window)->>Custom UI Backend (Flask): POST /chat with auth_code and state
-    Custom UI Backend (Flask)->>Remote Agent: POST /run_sse with function_response
-    Remote Agent-->>Custom UI Backend (Flask): SSE: agent response
-    Custom UI Backend (Flask)-->>Browser (Main Window): JSON: { response: ... }
+    Browser (Main Window)->>cloudrun_agent_ui_tester Backend (Flask): POST /chat with auth_code and state
+    cloudrun_agent_ui_tester Backend (Flask)->>Remote Agent: POST /run_sse with function_response
+    Remote Agent-->>cloudrun_agent_ui_tester Backend (Flask): SSE: agent response
+    cloudrun_agent_ui_tester Backend (Flask)-->>Browser (Main Window): JSON: { response: ... }
     Browser (Main Window)->>User: Displays agent response
 ```

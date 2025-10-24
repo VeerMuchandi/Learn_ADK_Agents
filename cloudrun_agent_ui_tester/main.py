@@ -24,13 +24,13 @@ def initialize_app_name(agent_url):
             print(f"Successfully fetched app name: {app_name}")
             return app_name
         else:
-            print("No app names found. Falling back to default.")
-            session['app_name'] = "route_planning_agent"
-            return "route_planning_agent"
+            print("No app names found.")
+            session.pop('app_name', None)
+            return None
     except requests.exceptions.RequestException as e:
-        print(f"Error getting app name: {e}. Falling back to default.")
-        session['app_name'] = "route_planning_agent"
-        return "route_planning_agent"
+        print(f"Error getting app name: {e}.")
+        session.pop('app_name', None)
+        return None
 
 @app.route('/')
 def index():
@@ -55,7 +55,9 @@ def session_manager():
         return jsonify({'session_id': session.get('session_id')})
     
     agent_url = request.json.get('agent_url', DEFAULT_AGENT_URL)
-    app_name = session.get('app_name', 'route_planning_agent')
+    app_name = session.get('app_name')
+    if not app_name:
+        return jsonify({'error': 'App name not found in session. Please initialize the app name.'}), 400
     if request.method == 'POST':
         headers = {'Content-Type': 'application/json'}
         session_url = f'{agent_url}/apps/{app_name}/users/user/sessions'
@@ -72,12 +74,13 @@ def session_manager():
 @app.route('/chat', methods=['POST'])
 def chat():
     """Receives a message from the user, forwards it to the agent, and returns the response."""
-    print("Chat function called.")
     user_message = request.json.get('message')
     auth_code = request.json.get('auth_code')
     state = request.json.get('state')
     agent_url = request.json.get('agent_url', DEFAULT_AGENT_URL)
-    app_name = session.get('app_name', 'route_planning_agent')
+    app_name = session.get('app_name')
+    if not app_name:
+        return jsonify({'error': 'App name not found in session. Please initialize the app name.'}), 400
 
     try:
         session_id = session.get("session_id")
@@ -134,11 +137,10 @@ def chat():
 
         run_sse_url = f'{agent_url}/run_sse'
 
-        print(f"Calling {run_sse_url} with headers: {headers} and data: {data}")
+        print(f"--- Chat Request ---\nURL: {run_sse_url}\nHeaders: {headers}\nBody: {json.dumps(data, indent=2)}\n--------------------------")
         response = requests.post(run_sse_url, headers=headers, json=data, stream=True)
+        print(f"--- Chat Response ---\nStatus Code: {response.status_code}\nHeaders: {response.headers}\n--------------------------")
         response.raise_for_status()
-        print(f"Received response from run_sse. Status: {response.status_code}")
-        print(response) # Debug print
 
         auth_config_to_store = None
         function_call_id_to_store = None
@@ -148,12 +150,11 @@ def chat():
         for line in response.iter_lines():
             if line:
                 decoded_line = line.decode('utf-8')
-                print(f"Received SSE line: {decoded_line}") # Debug print
+                print(f"SSE Data: {decoded_line}")
                 if decoded_line.startswith('data:'):
                     data_str = decoded_line[5:]
                     try:
                         data = json.loads(data_str)
-                        print(f"Parsed SSE data: {data}") # Debug print
 
                         if data.get('actions') and data['actions'].get('requestedAuthConfigs'):
                             for tool_id, auth_config in data['actions']['requestedAuthConfigs'].items():

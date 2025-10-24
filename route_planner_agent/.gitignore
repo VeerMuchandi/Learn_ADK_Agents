@@ -1,2 +1,8 @@
 .env
 __pycache__
+.venv
+.venv*
+venv.txt
+.gitignore
+deploy.py
+google_genai-1.38.0-py3-none-any.whl

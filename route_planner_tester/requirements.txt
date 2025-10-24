@@ -1,2 +1,0 @@
-flask 
-google-cloud-aiplatform[agent_engines]
