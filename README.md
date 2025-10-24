@@ -93,19 +93,25 @@ We recommend going through the examples in the following order:
 
     *   **Go to the example:** [route_planner_agent/README.md](route_planner_agent/README.md)
 
-6.  **Custom UI with Front-end OAuth2 flow (`custom-ui`)**
+6.  **Cloud Run Agent UI Tester (`cloudrun_agent_ui_tester`)**
 
-    A Flask-based web application that demonstrates how to implement the user-centric OAuth2 flow from a front-end perspective when interacting with ADK agents.
+    A Flask-based UI to test the OAuth flow for agents deployed on Google Cloud Run. This UI demonstrates how to implement the user-centric OAuth2 flow from a front-end perspective when interacting with ADK agents.
 
-    *   **Go to the example:** [custom-ui/README.md](custom-ui/README.md)
+    *   **Go to the example:** [cloudrun_agent_ui_tester/README.md](cloudrun_agent_ui_tester/README.md)
 
-7.  **Using Integration Connectors with Pre-configured Auth (`snow_agent`)**
+7.  **Agent Engine UI Tester (`agentengine_ui_tester`)**
+
+    A simple Flask-based UI to test the OAuth flow for agents deployed on Agent Engine. This UI helps in debugging and verifying the OAuth 2.0 setup between your agent and Google Cloud services.
+
+    *   **Go to the example:** [agentengine_ui_tester/README.md](agentengine_ui_tester/README.md)
+
+8.  **Using Integration Connectors with Pre-configured Auth (`snow_agent`)**
 
     This example demonstrates how to use the `ApplicationIntegrationToolset` to connect to a Google Cloud Integration Connector for ServiceNow. It uses a pre-configured OAuth 2.0 authentication setup where credentials are managed in Secret Manager. Use this example to test the OAuth 2.0 flow from your local workstation.
 
     *   **Go to the example:** [snow_agent/README.md](snow_agent/README.md)
 
-8.  **Dynamic OAuth with Integration Connectors (`snow_dynamic_oauth`)**
+9.  **Dynamic OAuth with Integration Connectors (`snow_dynamic_oauth`)**
 
     Building on the previous example, this agent implements the full OAuth 2.0 Authorization Code Grant Flow dynamically. It guides the user through the one-time authorization process in Agentspace and then uses the obtained tokens to make secure API calls via the Integration Connector.
 
