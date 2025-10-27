@@ -130,7 +130,7 @@ When the user sends a message that requires an OAuth-protected tool, the agent r
 **Initial Chat Request**
 ```
 --- Chat Request (Initial) ---
-URL: https://us-central1-aiplatform.googleapis.com/v1/projects/muchandi-proj1/locations/us-central1/reasoningEngines/3292892189654253568:streamQuery?alt=sse
+URL: https://us-central1-aiplatform.googleapis.com/v1/projects/[PROJECT_ID]/locations/us-central1/reasoningEngines/[REASONING_ENGINE_ID]:streamQuery?alt=sse
 Headers: {"Content-Type": "application/json", "Authorization": "Bearer [BEARER_TOKEN]", "Connection": "close"}
 Body: {
   "class_method": "async_stream_query",
@@ -276,7 +276,7 @@ After the user authenticates, the authorization code is sent back to the agent.
 
 ```
 --- Chat Request (Auth Code) ---
-URL: https://us-central1-aiplatform.googleapis.com/v1/projects/muchandi-proj1/locations/us-central1/reasoningEngines/3292892189654253568:streamQuery?alt=sse
+URL: https://us-central1-aiplatform.googleapis.com/v1/projects/[PROJECT_ID]/locations/us-central1/reasoningEngines/[REASONING_ENGINE_ID]:streamQuery?alt=sse
 Headers: {"Content-Type": "application/json", "Authorization": "Bearer [BEARER_TOKEN]", "Connection": "close"}
 Body: {
   "class_method": "async_stream_query",
