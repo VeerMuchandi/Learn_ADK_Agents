@@ -127,6 +127,7 @@ def get_user_credentials(
           token_uri=auth_config.auth_scheme.flows.authorizationCode.tokenUrl,
           client_id=client_id,
           client_secret=client_secret,
+          scopes=list(auth_config.auth_scheme.flows.authorizationCode.scopes.keys()),
       )
       # Cache the new credentials in the session state for future use.
       tool_context.state[credential_cache_key] = creds.to_json()

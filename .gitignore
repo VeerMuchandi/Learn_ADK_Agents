@@ -1,4 +1,11 @@
+.env
 .venv
 venv
-route_agent_env
+.venv*.*
+.python-version
+snow_dynamic_oauth.tar.gz
 __pycache__
+.gitignore
+GEMINI.md
+route_planner_agent/deploy.py
+route_planner_agent/deploy.py

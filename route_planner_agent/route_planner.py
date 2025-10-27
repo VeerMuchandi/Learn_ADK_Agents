@@ -4,12 +4,14 @@ import json
 import logging
 import os
 from typing import Union
+from typing import Tuple, Optional
 
 import requests
 from google.adk.auth import AuthConfig
 from google.cloud import logging as cloud_logging
 from dotenv import load_dotenv
 from google.adk.tools import ToolContext
+from google.oauth2.credentials import Credentials
 
 # --- Configuration ---
 # Load environment variables from a .env file
@@ -46,6 +48,38 @@ PEOPLE_API_URL = "https://people.googleapis.com/v1/people/me?personFields=names,
 
 from .oauth_helper import get_user_credentials
 
+def _get_credentials_or_auth_request(
+    tool_context: ToolContext, pending_message: str
+) -> Tuple[Optional[Credentials], Optional[str]]:
+  """
+  A helper function to abstract the credential fetching logic.
+
+  It checks for necessary environment variables and then calls get_user_credentials.
+  It returns credentials on success, or an error/pending message on failure or if auth is needed.
+
+  Args:
+      tool_context: The context of the tool run.
+      pending_message: The message to return if authentication is required.
+
+  Returns:
+      A tuple containing Credentials and an optional message.
+      (Credentials, None) on success.
+      (None, message) on failure or if auth is pending.
+  """
+  client_id = os.getenv("GOOGLE_CLIENT_ID")
+  client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+  redirect_uri = os.getenv("AGENT_REDIRECT_URI")
+
+  if not all([client_id, client_secret, redirect_uri]):
+    return None, "Error: OAuth Client ID, Secret, or Redirect URI is not configured in the .env file."
+
+  creds = get_user_credentials(
+      tool_context=tool_context, client_id=client_id, client_secret=client_secret,
+      redirect_uri=redirect_uri, scopes=SCOPES, credential_cache_key="route_planner_creds")
+
+  if isinstance(creds, AuthConfig) or creds is None:
+    return None, pending_message
+  return creds, None
 
 # --- ADK Tool Definition ---
 def get_directions(
@@ -68,26 +102,12 @@ def get_directions(
       destination,
       travel_mode,
   )
-  client_id = os.getenv("GOOGLE_CLIENT_ID")
-  client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-  redirect_uri = os.getenv("AGENT_REDIRECT_URI")
-
-
-  if not all([client_id, client_secret, redirect_uri]):
-    return "Error: OAuth Client ID, Secret, or Redirect URI is not configured in the .env file."
-
-  creds: Union[AuthConfig, str, None] = get_user_credentials(
-      tool_context=tool_context,
-      client_id=client_id,
-      client_secret=client_secret,
-      redirect_uri=redirect_uri,
-      scopes=SCOPES,
-      credential_cache_key="route_planner_creds",
+  creds, message = _get_credentials_or_auth_request(
+      tool_context,
+      "To get directions, I need you to sign in with your Google account first. Please follow the link to authorize me."
   )
-
-  if isinstance(creds, AuthConfig) or creds is None:
-    return "To get directions, I need you to sign in with your Google account first. Please follow the link to authorize me."
-
+  if message:
+    return message
   # At this point, we have valid credentials. Make the API call.
   try:
     project_id = os.getenv("GOOGLE_CLOUD_PROJECT_ID")
@@ -156,26 +176,12 @@ def get_address_of_place(tool_context: ToolContext, place_name: str) -> str:
   """
   logging.info("Tool called: Getting address for '%s'.", place_name)
 
-  client_id = os.getenv("GOOGLE_CLIENT_ID")
-  client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-  redirect_uri = os.getenv("AGENT_REDIRECT_URI")
-
-
-  if not all([client_id, client_secret, redirect_uri]):
-    return "Error: OAuth Client ID, Secret, or Redirect URI is not configured in the .env file."
-
-  creds: Union[AuthConfig, str, None] = get_user_credentials(
-      tool_context=tool_context,
-      client_id=client_id,
-      client_secret=client_secret,
-      redirect_uri=redirect_uri,
-      scopes=SCOPES,
-      credential_cache_key="route_planner_creds",
+  creds, message = _get_credentials_or_auth_request(
+      tool_context,
+      "To find an address, I need you to sign in with your Google account first. Please follow the link to authorize me."
   )
-
-  if isinstance(creds, AuthConfig) or creds is None:
-    return "To find an address, I need you to sign in with your Google account first. Please follow the link to authorize me."
-
+  if message:
+    return message
   # Handle special keywords "home" and "office" by calling the People API
   if place_name.lower() in ["home", "office"]:
     # Verify that the necessary scope was granted.
@@ -273,26 +279,12 @@ def search_nearby_places(
       "Tool called: Searching for '%s' near '%s'.", query, location
   )
 
-  client_id = os.getenv("GOOGLE_CLIENT_ID")
-  client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-  redirect_uri = os.getenv("AGENT_REDIRECT_URI")
-
-
-  if not all([client_id, client_secret, redirect_uri]):
-    return "Error: OAuth Client ID, Secret, or Redirect URI is not configured in the .env file."
-
-  creds: Union[AuthConfig, str, None] = get_user_credentials(
-      tool_context=tool_context,
-      client_id=client_id,
-      client_secret=client_secret,
-      redirect_uri=redirect_uri,
-      scopes=SCOPES,
-      credential_cache_key="route_planner_creds",
+  creds, message = _get_credentials_or_auth_request(
+      tool_context,
+      "To search for nearby places, I need you to sign in with your Google account first. Please follow the link to authorize me."
   )
-
-  if isinstance(creds, AuthConfig) or creds is None:
-    return "To search for nearby places, I need you to sign in with your Google account first. Please follow the link to authorize me."
-
+  if message:
+    return message
   try:
     # First, get the coordinates for the given location string.
     location_details_json = get_address_of_place(tool_context, location)
