@@ -1,4 +1,4 @@
-# cloudrun_agent_ui_tester for Testing ADK Agents
+# Testing ADK Agents deployed to Cloud Run
 
 This document provides a guide on how to use and understand the cloudrun_agent_ui_tester application, with a special focus on its implementation of the OAuth2 flow for authenticating with ADK agents.
 
@@ -18,8 +18,8 @@ Here is a diagram that illustrates the architecture:
 
 ```mermaid
 graph LR
-    A[Front-end (Client/Browser)] -- Request --> B(Back-end (Flask Application));
-    B -- Request --> C{Remote Agent};
+    A["Front-end (Client/Browser)"] -- Request --> B("Back-end (Flask Application)");
+    B -- Request --> C{"Remote Agent"};
     C -- Response --> B;
     B -- Response --> A;
 ```

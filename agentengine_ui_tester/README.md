@@ -18,8 +18,8 @@ Here is a diagram that illustrates the architecture:
 
 ```mermaid
 graph LR
-    A[Front-end (Client/Browser)] -- Request --> B(Back-end (Flask Application));
-    B -- Request --> C{Remote Agent (Reasoning Engine)};
+    A["Front-end (Client/Browser)"] -- Request --> B("Back-end (Flask Application)");
+    B -- Request --> C{"Remote Agent (Reasoning Engine)"};
     C -- Response --> B;
     B -- Response --> A;
 ```
@@ -150,6 +150,8 @@ Body: {
 --------------------------
 ```
 3.  The agent determines that the requested tool requires authentication and responds with an `authorization_url`.
+
+
 **Agent Response with Auth URI**
 
 The agent responds with a request for credentials, including the `authorizationUrl`.

@@ -107,6 +107,7 @@ To allow the agent to request permissions from users, you need to create an OAut
     6.  Under **Authorized redirect URIs**, click **+ ADD URI** and add the following two URIs:
         *   `http://127.0.0.1:8000/dev-ui/` (for use with the `adk web` UI)
         *   `http://localhost:8080` (for local testing with `test_people_api.py`)
+        *   `http://127.0.0.1:8080/oauth_callback` (for testing with `agentengine_ui_tester` or `cloudrun_agent_ui_tester`)
     7.  Click **CREATE**. You will be shown a **Client ID** and **Client secret**.
 
 5. **Configure your environment variables:**
@@ -115,7 +116,8 @@ To allow the agent to request permissions from users, you need to create an OAut
      ```
      GOOGLE_CLIENT_ID="YOUR_CLIENT_ID"
      GOOGLE_CLIENT_SECRET="YOUR_CLIENT_SECRET"
-     AGENT_REDIRECT_URI="http://localhost:8080/"
+     AGENT_REDIRECT_URI="http://localhost:8080/" # This is used for local testing of the agent itself.
+                                                 # For UI testers, ensure their callback URL is registered in GCP.
      GOOGLE_CLOUD_PROJECT_ID="YOUR_PROJECT_ID"
      ```
 
@@ -132,5 +134,46 @@ To allow the agent to request permissions from users, you need to create an OAut
    - **Example:**
      > "Get me directions from the Eiffel Tower to the Louvre Museum by walking."
 
+## Deploying the Agent
 
+This agent can be deployed to Agent Engine or Cloud Run. When deploying, ensure that the OAuth 2.0 Client ID in your Google Cloud project has the correct Authorized redirect URIs configured for the UI tester you intend to use.
 
+#### Deploy to Agent Engine
+
+To deploy the agent to Agent Engine, you will use the `adk deploy agent_engine` command. This will make your agent available as a Reasoning Engine in Google Cloud.
+
+1.  **Create a Google Cloud Storage (GCS) bucket** to use for staging your agent's code during deployment.
+    ```bash
+    gsutil mb gs://YOUR_GCS_BUCKET_NAME
+    ```
+    Replace `YOUR_GCS_BUCKET_NAME` with a unique bucket name.
+
+2.  **Deploy the agent:**
+    From the `route_planner_agent` directory, run the following command:
+    ```bash
+    adk deploy agent_engine --project=YOUR_PROJECT_ID --region=YOUR_REGION --staging_bucket=gs://YOUR_GCS_BUCKET_NAME --display_name="Route Planner Agent" --trace_to_cloud .
+    ```
+    Replace `YOUR_PROJECT_ID`, `YOUR_REGION`, and `YOUR_GCS_BUCKET_NAME` with your actual project ID, desired region (e.g., `us-central1`), and GCS bucket name.
+
+3.  **Testing with `agentengine_ui_tester`:**
+    To test this deployed agent, you can use the `agentengine_ui_tester` application. Ensure that `http://127.0.0.1:8080/oauth_callback` is added to the **Authorized redirect URIs** of your OAuth 2.0 Client ID in the Google Cloud Console. The tester UI will then provide this `redirect_uri` to your deployed agent during the OAuth flow.
+
+#### Deploy to Cloud Run
+
+To deploy the agent as a containerized service on Google Cloud Run, use the `adk deploy cloud_run` command.
+
+1.  **Create a Google Cloud Storage (GCS) bucket** (if you haven't already) to use for staging your agent's code during deployment.
+    ```bash
+    gsutil mb gs://YOUR_GCS_BUCKET_NAME
+    ```
+    Replace `YOUR_GCS_BUCKET_NAME` with a unique bucket name.
+
+2.  **Deploy the agent:**
+    From the `route_planner_agent` directory, run the following command:
+    ```bash
+    adk deploy cloud_run --project=YOUR_PROJECT_ID --region=YOUR_REGION --staging_bucket=gs://YOUR_GCS_BUCKET_NAME --display_name="Route Planner Agent" --trace_to_cloud .
+    ```
+    Replace `YOUR_PROJECT_ID`, `YOUR_REGION`, and `YOUR_GCS_BUCKET_NAME` with your actual project ID, desired region (e.g., `us-central1`), and GCS bucket name.
+
+3.  **Testing with `cloudrun_agent_ui_tester`:**
+    To test this deployed agent, you can use the `cloudrun_agent_ui_tester` application. Ensure that `http://127.0.0.1:8080/oauth_callback` is added to the **Authorized redirect URIs** of your OAuth 2.0 Client ID in the Google Cloud Console. The tester UI will then provide this `redirect_uri` to your deployed agent during the OAuth flow.
