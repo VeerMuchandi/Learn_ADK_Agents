@@ -123,7 +123,7 @@ curl -X DELETE \
 Then run the **Create** command (Step 2) again with the corrected values.
 
 ### 4. Register the Agent
-The "Agent Registration" menu is often hidden or buggy in the Console UI for `tool_authorizations`. We will use the REST API to ensure the agent is registered correctly. 
+For now, we will use the REST API approach via the CLI to ensure the agent is configured correctly with the authorization resource, as the Gemini Enterprise UI for agent registration currently does not support `tool_authorizations`.
 
 **Critical Concept:** Registering the agent with an `authorization_config` pointing to our Authorization Object (from Step 2) is the mechanism that tells the Gemini Enterprise UI to automatically trigger the OAuth sign-in flow for the end-user.
 
