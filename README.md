@@ -117,4 +117,10 @@ We recommend going through the examples in the following order:
 
     *   **Go to the example:** [snow_dynamic_oauth/README.md](snow_dynamic_oauth/README.md)
 
+10. **Gemini Enterprise Datastore Accessor (`ge_datastore_accessor_agent`)**
+
+    This agent demonstrates how to build a high-code AI agent that securely accesses a Gemini Enterprise Datastore, respecting user-level access controls. It shows how the end-user's identity is propagated from the Gemini Enterprise runtime to the agent and then to the Discovery Engine API.
+
+    *   **Go to the example:** [ge_datastore_accessor_agent/README.md](ge_datastore_accessor_agent/README.md)
+
 To begin, navigate to the `photo_finder_api` directory and follow the instructions in its `README.md` file.
